@@ -1,0 +1,309 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/"> {{title}} </a>
+    </div>
+</nav>
+
+<div class="container body-content">
+    <div class="row my-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Employee List
+
+                        <button class="btn btn-sm btn-primary" style="float:right;" (click)="open(demoModal)">
+                            <i class="fa fa-user-plus"></i> Add New Employee
+                        </button>
+                    </h4>
+                </div>
+                <div class="card-body overflow-auto">
+                    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+                        class="table table-hover table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Email</th>
+                                <th>Country</th>
+                                <th>State</th>
+                                <th>City</th>
+                                <th>Pan No</th>
+                                <th>Passport No</th>
+                                <th>Gender</th>
+                                <th>IsActive</th>
+                                <th>Profile Image</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="!skeloader">
+                            <tr *ngFor="let data of employeeList; index as i">
+                                <td>{{i+1}}</td>
+                                <td>{{data.EmailAddress}}</td>
+                                <td>{{data.CountryName}}</td>
+                                <td>{{data.StateName}}</td>
+                                <td>{{data.CityName}}</td>
+                                <td>{{data.PanNumber}}</td>
+                                <td>{{data.PassportNumber}}</td>
+                                <td>{{data.GenderName}}</td>
+                                <td>{{data.ActiveStatus}}</td>
+                                <td><img class="img" [src]="data.ProfileImage" height="50" width="50" /></td>
+                                <td>
+                                    <button (click)="GetEmployeeById(demoModal, data.Row_Id);"
+                                        class="btn btn-sm btn-info">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <br />
+                                    <button (click)="DeleteEmployee(data.Row_Id, true);" class="btn btn-sm btn-danger">
+                                        <i class="fa fa-trash"></i> Del
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="employeeList.length == 0">
+                                <td style="text-align: center;" colspan="11">
+                                    <p class="nodata_text">No Data Found</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ngx-skeleton-loader *ngIf="skeloader" count="10" appearance="line" animation="progress-dark"
+                        [theme]="{ 'background-color': '#212529', 'border': '1px solid #212529', 'animation-duration': '2s' }">
+                    </ngx-skeleton-loader>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <footer>
+        <p>&copy; Machine Assignment (v1.1)</p>
+    </footer>
+</div>
+
+<ng-template #demoModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">
+            Employee Detail
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <form (ngSubmit)="AddUpdateEmployee(EmployeeId)" [formGroup]="employeeForm">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <img class="img-lg img-thumbnail card-description" id="imgProfile" height="150" width="150"
+                            [src]="imageUrl" alt="Profile Picture" />
+                        <input type="hidden" formControlName="txtImageName" id="txtImageName" />
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtFirstName" class="form-label">First Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" formControlName="txtFirstName" id="txtFirstName" class="form-control"
+                                    placeholder="First Name" onkeypress="return /[0-9a-zA-Z]/i.test(event.key)"
+                                    required>
+                                <div *ngIf="displayMessage['txtFirstName']" class="error">
+                                    {{ displayMessage['txtFirstName'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="txtLastName" class="form-label">Last Name</label>
+                                <input type="text" formControlName="txtLastName" id="txtLastName" class="form-control"
+                                    placeholder="Last Name" onkeypress="return /[0-9a-zA-Z]/i.test(event.key)" required>
+                                <div *ngIf="displayMessage['txtLastName']" class="error">
+                                    {{ displayMessage['txtLastName'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtEmail" class="form-label">Email Address <span
+                                        class="text-danger">*</span></label>
+                                <input type="email" formControlName="txtEmail" id="txtEmail" class="form-control"
+                                    placeholder="Email Address" oninput="this.value = this.value.toLowerCase()"
+                                    required>
+                                <div *ngIf="displayMessage['txtEmail']" class="error">
+                                    {{ displayMessage['txtEmail'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtMobile" class="form-label">Mobile Number <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" formControlName="txtMobile" id="txtMobile" class="form-control"
+                                    placeholder="Mobile Number" required />
+                                <div *ngIf="displayMessage['txtMobile']" class="error">
+                                    {{ displayMessage['txtMobile'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtPan" class="form-label">Pan Number <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" formControlName="txtPan" id="txtPan" class="form-control"
+                                    placeholder="Pan Number" onkeypress="return /[0-9a-zA-Z]/i.test(event.key)"
+                                    required />
+                                <div *ngIf="displayMessage['txtPan']" class="error">
+                                    {{ displayMessage['txtPan'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtPassport" class="form-label">Passport Number <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" formControlName="txtPassport" id="txtPassport" class="form-control"
+                                    placeholder="Passport Number" onkeypress="return /[0-9a-zA-Z ]/i.test(event.key)"
+                                    required />
+                                <div *ngIf="displayMessage['txtPassport']" class="error">
+                                    {{ displayMessage['txtPassport'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtDOB" class="form-label">Date of Birth <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" max="{{maxDate | date:'yyyy-MM-dd'}}" formControlName="txtDOB"
+                                    (change)="validatAge()" id="txtDOB" class="form-control" placeholder="mm/dd/yyyy"
+                                    required />
+                                <div *ngIf="displayMessage['txtDOB']" class="error">
+                                    {{ displayMessage['txtDOB'] }}
+                                </div>
+                                <div *ngIf="ageError" class="error">
+                                    {{ errorMsgAge }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group req">
+                                <label for="txtDOJ" class="form-label">Date of Joinee <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" max="{{maxDate | date:'yyyy-MM-dd'}}" formControlName="txtDOJ"
+                                    (change)="validatAge()" id="txtDOJ" class="form-control" placeholder="mm/dd/yyyy"
+                                    required />
+                                <div *ngIf="displayMessage['txtDOJ']" class="error">
+                                    {{ displayMessage['txtDOJ'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group req">
+                                <label for="ddlCountry" class="form-label">Country <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-control select2" formControlName="ddlCountry" id="ddlCountry"
+                                    [(ngModel)]="selectedCountry" (change)="GetStateList($event)">
+                                    <option value="0">-- Select Option --</option>
+                                    <option *ngFor="let item of countryList" [value]="item.ID">
+                                        {{item.Value}}</option>
+                                </select>
+                                <div *ngIf="displayMessage['ddlCountry']" class="error">
+                                    {{ displayMessage['ddlCountry'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group req">
+                                <label for="ddlState" class="form-label">State <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-control select2" formControlName="ddlState" id="ddlState"
+                                    [(ngModel)]="selectedState" (change)="GetCityList($event)">
+                                    <option value="0">-- Select Option --</option>
+                                    <option *ngFor="let item of stateList" [value]="item.ID">
+                                        {{item.Value}}</option>
+                                </select>
+                                <div *ngIf="displayMessage['ddlState']" class="error">
+                                    {{ displayMessage['ddlState'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group req">
+                                <label for="ddlCity" class="form-label">City <span class="text-danger">*</span></label>
+                                <select class="form-control select2" formControlName="ddlCity" id="ddlCity"
+                                    [(ngModel)]="selectedCity">
+                                    <option value="0">-- Select Option --</option>
+                                    <option *ngFor="let item of cityList" [value]="item.ID">
+                                        {{item.Value}}</option>
+                                </select>
+                                <div *ngIf="displayMessage['ddlCity']" class="error">
+                                    {{ displayMessage['ddlCity'] }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group req" id="input_file">
+                                <label for="fileProfile" class="form-label">Profile Picture <span
+                                        class="text-danger">*</span></label>
+                                <input type="file" class="form-control" formControlName="fileProfile" id="fileProfile"
+                                    (change)="handleFileInput($event)" accept="image/jpeg, image/png" required>
+                                <div *ngIf="displayMessage['fileProfile']" class="error">
+                                    {{ displayMessage['fileProfile'] }}
+                                </div>
+                                <div *ngIf="fileSizeError || fileTypeError" class="error">
+                                    {{ errorMsgFile }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group req">
+                                <label class="form-label">
+                                    Gender <span class="text-danger">*</span>
+                                </label>
+                                <div class="form-control">
+                                    <input type="radio" formControlName="rdoGender" id="male" [value]="1"
+                                        (click)="selectedGender = '1'" [checked]="selectedGender === '1'">
+                                    <label for="male">Male</label>
+                                    &nbsp;&nbsp;
+                                    <input type="radio" formControlName="rdoGender" id="female" [value]="2"
+                                        (click)="selectedGender = '2'" [checked]="selectedGender === '2'">
+                                    <label for="female">Female</label>
+                                </div>
+                                <div *ngIf="displayMessage['rdoGender']" class="error">
+                                    {{ displayMessage['rdoGender'] }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group req">
+                                <label for="chkActive" class="form-label">Active</label>
+                                <div class="form-control">
+                                    <input type="checkbox" [checked]="isChecked" class=""> Active
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success mx-2">Submit</button>
+                                <!-- [disabled]="employeeForm.invalid || isAddBtnClick">Submit</button> -->
+                            <button type="button" class="btn btn-outline-dark"
+                                (click)="modal.close('Cancle click')">Cancle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+
+<router-outlet />
